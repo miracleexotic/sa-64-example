@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/chanwit/sa-64-example/controller"
-	"github.com/chanwit/sa-64-example/entity"
-	"github.com/chanwit/sa-64-example/middlewares"
 	"github.com/gin-gonic/gin"
+	"github.com/miracleexotic/sa-64-example/controller"
+	"github.com/miracleexotic/sa-64-example/entity"
+	"github.com/miracleexotic/sa-64-example/middlewares"
 )
 
 func main() {

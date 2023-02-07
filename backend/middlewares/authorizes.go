@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/chanwit/sa-64-example/service"
 	"github.com/gin-gonic/gin"
+	"github.com/miracleexotic/sa-64-example/service"
 )
 
 // validates token
