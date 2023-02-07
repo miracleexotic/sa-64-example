@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/chanwit/sa-64-example/entity"
 	"github.com/gin-gonic/gin"
+	"github.com/miracleexotic/sa-64-example/entity"
 )
 
 // POST /watch_videos

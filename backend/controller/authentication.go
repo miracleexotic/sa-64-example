@@ -3,9 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"github.com/chanwit/sa-64-example/entity"
-	"github.com/chanwit/sa-64-example/service"
 	"github.com/gin-gonic/gin"
+	"github.com/miracleexotic/sa-64-example/entity"
+	"github.com/miracleexotic/sa-64-example/service"
 	"golang.org/x/crypto/bcrypt"
 )
 

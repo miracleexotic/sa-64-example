@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
-	"github.com/chanwit/sa-64-example/entity"
 	"github.com/gin-gonic/gin"
+	"github.com/miracleexotic/sa-64-example/entity"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/asaskevich/govalidator"
