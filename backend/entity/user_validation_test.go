@@ -1,8 +1,8 @@
 package entity
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/asaskevich/govalidator"
 	. "github.com/onsi/gomega"
@@ -13,10 +13,10 @@ func TestUserNameNotBlank(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	user := User{
-		Name: "", // ผิด
-		Email: "chanwit@gmail.com",
+		Name:      "", // ผิด
+		Email:     "chanwit@gmail.com",
 		StudentID: "B6000000",
-		Password: "111",
+		Password:  "111",
 	}
 
 	// ตรวจสอบด้วย govalidator
@@ -36,10 +36,10 @@ func TestEmailMustBeValid(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	user := User{
-		Name: "Abc",
-		Email: "qwe#123", // ผิด
-		StudentID: "B6000000",		
-		Password: "111",
+		Name:      "Abc",
+		Email:     "qwe#123", // ผิด
+		StudentID: "B6000000",
+		Password:  "111",
 	}
 
 	ok, err := govalidator.ValidateStruct(user)
@@ -74,10 +74,10 @@ func TestStudentIDMustBeInValidPattern(t *testing.T) {
 
 	for _, fixture := range fixtures {
 		user := User{
-			Name: "Abc",
-			Email: "me@example.com",
-			StudentID: fixture, // ผิด	
-			Password: "111",
+			Name:      "Abc",
+			Email:     "me@example.com",
+			StudentID: fixture, // ผิด
+			Password:  "111",
 		}
 
 		ok, err := govalidator.ValidateStruct(user)
@@ -92,27 +92,3 @@ func TestStudentIDMustBeInValidPattern(t *testing.T) {
 		g.Expect(err.Error()).To(Equal(fmt.Sprintf(`StudentID: %s does not validate as matches(^[BMD]\d{7}$)`, fixture)))
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
