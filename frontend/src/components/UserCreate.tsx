@@ -13,6 +13,7 @@ import Divider from "@material-ui/core/Divider";
 import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 import { UsersInterface } from "../models/IUser";
+import bcrypt from "bcryptjs-react";
 
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -57,10 +58,12 @@ function UserCreate() {
   };
 
   function submit() {
+    var hash_password = bcrypt.hashSync(user.Password ?? "", 14);
+
     let data = {
       Name: user.Name ?? "",
       Email: user.Email ?? "",
-      Password: user.Password ?? "",
+      Password: hash_password ?? "",
     };
 
     const apiUrl = "http://localhost:8080/users";
