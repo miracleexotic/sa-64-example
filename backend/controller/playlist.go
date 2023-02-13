@@ -38,7 +38,7 @@ func GetPlaylist(c *gin.Context) {
 func GetPlaylistWatchedByUser(c *gin.Context) {
 	var playlist entity.Playlist
 	id := c.Param("id")
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM playlists WHERE owner_id = ? AND title = ?", id, "Watched").Find(&playlist).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM playlists WHERE owner_id = ? AND title = ?", id, "Watched").Find(&playlist).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
