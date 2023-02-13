@@ -15,6 +15,8 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "bcryptjs": "^2.4.3",
+    "bcryptjs-react": "^2.4.6",
     "date-fns": "^2.25.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -24,7 +26,7 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set HTTPS=true&&set SSL_CRT_FILE=C:/Windows/System32/ssl_certifications/cert.crt&&set SSL_KEY_FILE=C:/Windows/System32/ssl_certifications/cert.key&&react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

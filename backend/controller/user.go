@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/miracleexotic/sa-64-example/entity"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -44,12 +43,12 @@ func CreateUser(c *gin.Context) {
 	}
 
 	// เข้ารหัสลับรหัสผ่านที่ผู้ใช้กรอกก่อนบันทึกลงฐานข้อมูล
-	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "error hashing password"})
-		return
-	}
-	user.Password = string(bytes)
+	// bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	// if err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "error hashing password"})
+	// 	return
+	// }
+	// user.Password = string(bytes)
 
 	// แทรกการ validate ไว้ช่วงนี้ของ controller
 	if _, err := govalidator.ValidateStruct(user); err != nil {

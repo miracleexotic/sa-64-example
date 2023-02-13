@@ -46,7 +46,7 @@ function SignIn() {
     const apiUrl = "http://localhost:8080/login";
     const requestOptions = {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
       body: JSON.stringify(signin),
     };
     fetch(apiUrl, requestOptions)
