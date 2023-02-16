@@ -1,14 +1,14 @@
 version: "3.8"
 services:
   web:
-    image: sa-64-frontend
-    # build: 
-        # dockerfile: frontend\Dockerfile
+    # image: sa-64-frontend
+    build: 
+        dockerfile: frontend\Dockerfile
     ports:
       - "3000:3000"
   backend:
-    image: sa-64-backend
-    # build: 
-        # dockerfile: backend\Dockerfile
+    # image: sa-64-backend
+    build: 
+        dockerfile: backend\Dockerfile
     ports:
       - "8080:8080"
