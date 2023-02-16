@@ -2,14 +2,21 @@
 
 FROM golang:1.20-alpine
 
+RUN apk --update add \
+    go \
+    musl-dev
+
 WORKDIR /backend
 
-COPY go.mod ./
-COPY go.sum ./
+RUN apk --update add \
+    util-linux-dev
+
+COPY backend/go.mod ./
+COPY backend/go.sum ./
 RUN go mod download
 
-COPY . .
-RUN go build -o /sa-64-backend
+COPY backend/. .
+RUN go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o /sa-64-backend
 
 EXPOSE 8080
 

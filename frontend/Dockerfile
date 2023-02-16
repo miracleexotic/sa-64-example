@@ -4,9 +4,9 @@ FROM node:14.17.5-alpine3.14
 
 WORKDIR /frontend
 
-COPY package*.json ./
+COPY frontend/package*.json ./
 RUN npm install
 
-COPY . .
+COPY frontend/. .
 EXPOSE 3000
 CMD [ "npm", "start" ]
