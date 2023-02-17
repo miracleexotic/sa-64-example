@@ -40,7 +40,7 @@ func (j *JwtWrapper) GenerateToken(email string) (signedToken string, err error)
 	return
 }
 
-//Validate Token validates the jwt token
+// Validate Token validates the jwt token
 func (j *JwtWrapper) ValidateToken(signedToken string) (claims *JwtClaim, err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
