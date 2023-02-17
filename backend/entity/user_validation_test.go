@@ -51,7 +51,7 @@ func TestEmailMustBeValid(t *testing.T) {
 	g.Expect(err).ToNot(BeNil())
 
 	// err.Error ต้องมี error message แสดงออกมา
-	g.Expect(err.Error()).To(Equal("Email: qwe#123 does not validate as email"))
+	g.Expect(err.Error()).To(Equal("email: qwe#123 does not validate as email"))
 }
 
 func TestStudentIDMustBeInValidPattern(t *testing.T) {
@@ -89,6 +89,6 @@ func TestStudentIDMustBeInValidPattern(t *testing.T) {
 		g.Expect(err).ToNot(BeNil())
 
 		// err.Error ต้องมี error message แสดงออกมา
-		g.Expect(err.Error()).To(Equal(fmt.Sprintf(`StudentID: %s does not validate as matches(^[BMD]\d{7}$)`, fixture)))
+		g.Expect(err.Error()).To(Equal(fmt.Sprintf(`student_id: %s does not validate as matches(^[BMD]\d{7}$)`, fixture)))
 	}
 }
