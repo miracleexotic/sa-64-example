@@ -4,19 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"golang.org/x/crypto/bcrypt"
 )
-
-// Connection data
-const uri = "mongodb+srv://user:P%40ssw0rd@clustergo.suvtb.mongodb.net"
-const database_name = "sa-64"
 
 var db *mongo.Database
 
@@ -25,6 +23,14 @@ func DB() *mongo.Database {
 }
 
 func ConnectDatabase() *mongo.Client {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	uri := "mongodb+srv://" + os.Getenv("DB_MONGO_USER") + ":" + os.Getenv("DB_MONGO_PASS") + "@" + os.Getenv("DB_MONGO_URL")
+	database_name := os.Getenv("DB_MONGO_NAME")
+
 	fmt.Printf("[>] Connecting to MongoDB... ")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
