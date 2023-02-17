@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/miracleexotic/sa-64-example/entity"
 	"github.com/miracleexotic/sa-64-example/service"
+	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,7 +20,7 @@ type LoginPayload struct {
 // LoginResponse token response
 type LoginResponse struct {
 	Token string `json:"token"`
-	ID    uint   `json:"id"`
+	ID    string `json:"id"`
 }
 
 // POST /login
@@ -31,7 +33,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	// ค้นหา user ด้วย email ที่ผู้ใช้กรอกเข้ามา
-	if err := entity.DB().Raw("SELECT * FROM users WHERE email = ?", payload.Email).Scan(&user).Error; err != nil {
+	if err := entity.DB().Collection("Users").FindOne(context.TODO(), bson.M{"email": payload.Email}).Decode(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -62,7 +64,7 @@ func Login(c *gin.Context) {
 
 	tokenResponse := LoginResponse{
 		Token: signedToken,
-		ID:    user.ID,
+		ID:    user.ID.Hex(),
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": tokenResponse})
