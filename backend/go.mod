@@ -6,6 +6,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/gin-gonic/gin v1.8.2
 	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/joho/godotenv v1.5.1
 	github.com/onsi/gomega v1.26.0
 	go.mongodb.org/mongo-driver v1.11.2
 	golang.org/x/crypto v0.5.0
