@@ -1,116 +1,112 @@
 package controller
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/miracleexotic/sa-64-example/entity"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // POST /watch_videos
 func CreateWatchVideo(c *gin.Context) {
+	email, _ := c.Get("email")
+
+	var user entity.User
+	if err := entity.DB().Collection("Users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	var watchvideo entity.WatchVideo
-	var resolution entity.Resolution
 	var playlist entity.Playlist
-	var video entity.Video
 
-	// ผลลัพธ์ที่ได้จากขั้นตอนที่ 8 จะถูก bind เข้าตัวแปร watchVideo
 	if err := c.ShouldBindJSON(&watchvideo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 9: ค้นหา video ด้วย id
-	if tx := entity.DB().Where("id = ?", watchvideo.VideoID).First(&video); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "video not found"})
+	fmt.Println(watchvideo)
+
+	if err := entity.DB().Collection("Playlists").FindOne(context.TODO(), bson.M{"$and": []interface{}{bson.M{"owner_id": user.ID}, bson.M{"title": "Watched"}}}).Decode(&playlist); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 10: ค้นหา resolution ด้วย id
-	if tx := entity.DB().Where("id = ?", watchvideo.ResolutionID).First(&resolution); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "resolution not found"})
-		return
-	}
-
-	// 11: ค้นหา playlist ด้วย id
-	if tx := entity.DB().Where("id = ?", watchvideo.PlaylistID).First(&playlist); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "playlist not found"})
-		return
-	}
-	// 12: สร้าง WatchVideo
-	wv := entity.WatchVideo{
-		Resolution:  resolution,             // โยงความสัมพันธ์กับ Entity Resolution
-		Video:       video,                  // โยงความสัมพันธ์กับ Entity Video
-		Playlist:    playlist,               // โยงความสัมพันธ์กับ Entity Playlist
-		WatchedTime: watchvideo.WatchedTime, // ตั้งค่าฟิลด์ watchedTime
-	}
+	playlist.WatchVideos = append(playlist.WatchVideos, watchvideo)
 
 	// ขั้นตอนการ validate ที่นำมาจาก unit test
-	if _, err := govalidator.ValidateStruct(wv); err != nil {
+	if _, err := govalidator.ValidateStruct(watchvideo); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// 13: บันทึก
-	if err := entity.DB().Create(&wv).Error; err != nil {
+	res, err := entity.DB().Collection("Playlists").UpdateOne(context.TODO(), bson.M{"_id": playlist.ID}, bson.M{
+		"$set": bson.M{
+			"title":        playlist.Title,
+			"owner_id":     playlist.OwnerID,
+			"watch_videos": playlist.WatchVideos,
+		},
+	})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": wv})
+
+	c.JSON(http.StatusOK, gin.H{"data": res})
 }
 
-// GET /watchvideo/:id
-func GetWatchVideo(c *gin.Context) {
-	var watchvideo entity.WatchVideo
-	id := c.Param("id")
-	if err := entity.DB().Preload("Resolution").Preload("Playlist").Preload("Video").Raw("SELECT * FROM watch_videos WHERE id = ?", id).Find(&watchvideo).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"data": watchvideo})
-}
-
-// GET /watch_videos
+// GET /watchvideo
 func ListWatchVideos(c *gin.Context) {
-	var watchvideos []entity.WatchVideo
-	if err := entity.DB().Preload("Resolution").Preload("Playlist").Preload("Video").Raw("SELECT * FROM watch_videos").Find(&watchvideos).Error; err != nil {
+	email, _ := c.Get("email")
+
+	var user entity.User
+	if err := entity.DB().Collection("Users").FindOne(context.TODO(), bson.M{"email": email}).Decode(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": watchvideos})
-}
-
-// DELETE /watch_videos/:id
-func DeleteWatchVideo(c *gin.Context) {
-	id := c.Param("id")
-	if tx := entity.DB().Exec("DELETE FROM watch_videos WHERE id = ?", id); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "watchvideo not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": id})
-}
-
-// PATCH /watch_videos
-func UpdateWatchVideo(c *gin.Context) {
-	var watchvideo entity.WatchVideo
-	if err := c.ShouldBindJSON(&watchvideo); err != nil {
+	var playlists []entity.Playlist
+	cur, err := entity.DB().Collection("Playlists").Find(context.TODO(), bson.M{"owner_id": user.ID})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	cur.All(context.TODO(), &playlists)
 
-	if tx := entity.DB().Where("id = ?", watchvideo.ID).First(&watchvideo); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "watchvideo not found"})
-		return
+	var watchvideodatas []entity.WatchVideoData
+	for i := 0; i < len(playlists); i++ {
+		for j := 0; j < len(playlists[i].WatchVideos); j++ {
+			var resolution entity.Resolution
+			if err := entity.DB().Collection("Resolutions").FindOne(context.TODO(), bson.M{"_id": playlists[i].WatchVideos[j].ResolutionID}).Decode(&resolution); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			var video entity.Video
+			if err := entity.DB().Collection("Videos").FindOne(context.TODO(), bson.M{"_id": playlists[i].WatchVideos[j].VideoID}).Decode(&video); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			watchvideodata := entity.WatchVideoData{
+				ID:           ((i + 1) * 10) + j,
+				WatchedTime:  playlists[i].WatchVideos[j].WatchedTime,
+				ResolutionID: playlists[i].WatchVideos[j].ResolutionID,
+				Resolution:   resolution,
+				PlaylistID:   playlists[i].ID,
+				Playlist:     playlists[i],
+				VideoID:      playlists[i].WatchVideos[j].VideoID,
+				Video:        video,
+			}
+
+			watchvideodatas = append(watchvideodatas, watchvideodata)
+		}
 	}
 
-	if err := entity.DB().Save(&watchvideo).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": watchvideo})
+	c.JSON(http.StatusOK, gin.H{"data": watchvideodatas})
 }

@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/miracleexotic/sa-64-example/entity"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // POST /playlists
@@ -15,18 +18,25 @@ func CreatePlaylist(c *gin.Context) {
 		return
 	}
 
-	if err := entity.DB().Create(&playlist).Error; err != nil {
+	res, err := entity.DB().Collection("Playlists").InsertOne(context.TODO(), &playlist)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": playlist})
+
+	c.JSON(http.StatusOK, gin.H{"data": res.InsertedID})
 }
 
 // GET /playlist/:id
 func GetPlaylist(c *gin.Context) {
 	var playlist entity.Playlist
-	id := c.Param("id")
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM playlists WHERE id = ?", id).Find(&playlist).Error; err != nil {
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := entity.DB().Collection("Playlists").FindOne(context.TODO(), bson.M{"_id": id}).Decode(&playlist); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -37,8 +47,13 @@ func GetPlaylist(c *gin.Context) {
 // GET /playlist/watched/user/:id
 func GetPlaylistWatchedByUser(c *gin.Context) {
 	var playlist entity.Playlist
-	id := c.Param("id")
-	if err := entity.DB().Raw("SELECT * FROM playlists WHERE owner_id = ? AND title = ?", id, "Watched").Find(&playlist).Error; err != nil {
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := entity.DB().Collection("Playlists").FindOne(context.TODO(), bson.M{"$and": []interface{}{bson.M{"owner_id": id}, bson.M{"title": "Watched"}}}).Decode(&playlist); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -49,23 +64,31 @@ func GetPlaylistWatchedByUser(c *gin.Context) {
 // GET /playlists
 func ListPlaylists(c *gin.Context) {
 	var playlists []entity.Playlist
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM playlists").Find(&playlists).Error; err != nil {
+	cur, err := entity.DB().Collection("Playlists").Find(context.TODO(), bson.D{})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	cur.All(context.TODO(), &playlists)
 
 	c.JSON(http.StatusOK, gin.H{"data": playlists})
 }
 
 // DELETE /playlists/:id
 func DeletePlaylist(c *gin.Context) {
-	id := c.Param("id")
-	if tx := entity.DB().Exec("DELETE FROM playlists WHERE id = ?", id); tx.RowsAffected == 0 {
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := entity.DB().Collection("Playlists").DeleteOne(context.TODO(), bson.M{"_id": id})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "playlist not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": id})
+	c.JSON(http.StatusOK, gin.H{"data": res.DeletedCount})
 }
 
 // PATCH /playlists
@@ -76,15 +99,17 @@ func UpdatePlaylist(c *gin.Context) {
 		return
 	}
 
-	if tx := entity.DB().Where("id = ?", playlist.ID).First(&playlist); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "playlist not found"})
-		return
-	}
-
-	if err := entity.DB().Save(&playlist).Error; err != nil {
+	res, err := entity.DB().Collection("Playlists").UpdateOne(context.TODO(), bson.M{"_id": playlist.ID}, bson.M{
+		"$set": bson.M{
+			"title":        playlist.Title,
+			"owner_id":     playlist.OwnerID,
+			"watch_videos": playlist.WatchVideos,
+		},
+	})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": playlist})
+	c.JSON(http.StatusOK, gin.H{"data": res.UpsertedID})
 }

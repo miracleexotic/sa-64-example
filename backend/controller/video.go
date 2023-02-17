@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/miracleexotic/sa-64-example/entity"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // POST /videos
@@ -15,19 +18,25 @@ func CreateVideo(c *gin.Context) {
 		return
 	}
 
-	if err := entity.DB().Create(&video).Error; err != nil {
+	res, err := entity.DB().Collection("Videos").InsertOne(context.TODO(), &video)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": video})
+
+	c.JSON(http.StatusOK, gin.H{"data": res.InsertedID})
 }
 
 // GET /video/:id
 func GetVideo(c *gin.Context) {
 	var video entity.Video
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	id := c.Param("id")
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM videos WHERE id = ?", id).Find(&video).Error; err != nil {
+	if err := entity.DB().Collection("Videos").FindOne(context.TODO(), bson.M{"_id": id}).Decode(&video); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -38,23 +47,31 @@ func GetVideo(c *gin.Context) {
 // GET /videos
 func ListVideos(c *gin.Context) {
 	var videos []entity.Video
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM videos").Find(&videos).Error; err != nil {
+	cur, err := entity.DB().Collection("Videos").Find(context.TODO(), bson.D{})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	cur.All(context.TODO(), &videos)
 
 	c.JSON(http.StatusOK, gin.H{"data": videos})
 }
 
 // DELETE /videos/:id
 func DeleteVideo(c *gin.Context) {
-	id := c.Param("id")
-	if tx := entity.DB().Exec("DELETE FROM videos WHERE id = ?", id); tx.RowsAffected == 0 {
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := entity.DB().Collection("Videos").DeleteOne(context.TODO(), bson.M{"_id": id})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "video not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": id})
+	c.JSON(http.StatusOK, gin.H{"data": res.DeletedCount})
 }
 
 // PATCH /videos
@@ -65,15 +82,17 @@ func UpdateVideo(c *gin.Context) {
 		return
 	}
 
-	if tx := entity.DB().Where("id = ?", video.ID).First(&video); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "video not found"})
-		return
-	}
-
-	if err := entity.DB().Save(&video).Error; err != nil {
+	res, err := entity.DB().Collection("Videos").UpdateOne(context.TODO(), bson.M{"_id": video.ID}, bson.M{
+		"$set": bson.M{
+			"name":     video.Name,
+			"url":      video.Url,
+			"owner_id": video.OwnerID,
+		},
+	})
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": video})
+	c.JSON(http.StatusOK, gin.H{"data": res.UpsertedID})
 }
