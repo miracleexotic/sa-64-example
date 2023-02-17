@@ -33,7 +33,7 @@ function Users() {
   const [users, setUsers] = useState<UsersInterface[]>([]);
 
   const getUsers = async () => {
-    const apiUrl = "http://localhost:8080/users";
+    const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}/users`;
     const requestOptions = {
       method: "GET",
       headers: {
@@ -55,7 +55,7 @@ function Users() {
 
   useEffect(() => {
     getUsers();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
@@ -87,22 +87,26 @@ function Users() {
             <TableHead>
               <TableRow>
                 <TableCell align="center" width="10%">
-                  ลำดับ
+                  ID
                 </TableCell>
-                <TableCell align="center" width="45%">
-                  ชื่อ
+                <TableCell align="center" width="30%">
+                  Name
                 </TableCell>
-                <TableCell align="center" width="45%">
-                  อีเมล
+                <TableCell align="center" width="30%">
+                  Student ID
+                </TableCell>
+                <TableCell align="center" width="30%">
+                  Email
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {users.map((user: UsersInterface) => (
-                <TableRow key={user.ID}>
-                  <TableCell align="center">{user.ID}</TableCell>
-                  <TableCell align="center">{user.Name}</TableCell>
-                  <TableCell align="center">{user.Email}</TableCell>
+                <TableRow key={user.id}>
+                  <TableCell align="center">{user.id}</TableCell>
+                  <TableCell align="center">{user.name}</TableCell>
+                  <TableCell align="center">{user.student_id}</TableCell>
+                  <TableCell align="center">{user.email}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

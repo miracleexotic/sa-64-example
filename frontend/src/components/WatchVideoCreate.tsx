@@ -4,7 +4,6 @@ import {
   makeStyles,
   Theme,
   createStyles,
-  alpha,
 } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import FormControl from "@material-ui/core/FormControl";
@@ -18,7 +17,6 @@ import Snackbar from "@material-ui/core/Snackbar";
 import Select from "@material-ui/core/Select";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 
-import { UsersInterface } from "../models/IUser";
 import { PlaylistsInterface } from "../models/IPlaylist";
 import { ResolutionsInterface } from "../models/IResolution";
 import { VideosInterface } from "../models/IVideo";
@@ -52,7 +50,6 @@ const useStyles = makeStyles((theme: Theme) =>
 function WatchVideoCreate() {
   const classes = useStyles();
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [users, setUsers] = useState<UsersInterface[]>([]);
   const [videos, setVideos] = useState<VideosInterface[]>([]);
   const [resolutions, setResolutions] = useState<ResolutionsInterface[]>([]);
   const [playlists, setPlaylists] = useState<PlaylistsInterface>();
@@ -64,7 +61,7 @@ function WatchVideoCreate() {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const apiUrl = "http://localhost:8080";
+  const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}`;
   const requestOptions = {
     method: "GET",
     headers: {
@@ -96,18 +93,6 @@ function WatchVideoCreate() {
     setSelectedDate(date);
   };
 
-  const getUsers = async () => {
-    fetch(`${apiUrl}/users`, requestOptions)
-      .then((response) => response.json())
-      .then((res) => {
-        if (res.data) {
-          setUsers(res.data);
-        } else {
-          console.log("else");
-        }
-      });
-  };
-
   const getVideos = async () => {
     fetch(`${apiUrl}/videos`, requestOptions)
       .then((response) => response.json())
@@ -137,7 +122,6 @@ function WatchVideoCreate() {
     fetch(`${apiUrl}/playlist/watched/user/${uid}`, requestOptions)
       .then((response) => response.json())
       .then((res) => {
-        watchVideo.PlaylistID = res.data.ID
         if (res.data) {
           setPlaylists(res.data);
         } else {
@@ -147,23 +131,16 @@ function WatchVideoCreate() {
   };
 
   useEffect(() => {
-    getUsers();
     getVideos();
     getResolution();
     getPlaylist();
-  }, []);
-
-  const convertType = (data: string | number | undefined) => {
-    let val = typeof data === "string" ? parseInt(data) : data;
-    return val;
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function submit() {
     let data = {
-      ResolutionID: convertType(watchVideo.ResolutionID),
-      PlaylistID: convertType(watchVideo.PlaylistID),
-      VideoID: convertType(watchVideo.VideoID),
-      WatchedTime: selectedDate,
+      watched_time: selectedDate,
+      resolution_id: watchVideo.resolution_id,
+      video_id: watchVideo.video_id,
     };
 
     console.log(data)
@@ -177,9 +154,10 @@ function WatchVideoCreate() {
       body: JSON.stringify(data),
     };
 
-    fetch(`${apiUrl}/watch_videos`, requestOptionsPost)
+    fetch(`${apiUrl}/watch_video`, requestOptionsPost)
       .then((response) => response.json())
       .then((res) => {
+        console.log(res)
         if (res.data) {
           console.log("บันทึกได้")
           setSuccess(true)
@@ -224,18 +202,18 @@ function WatchVideoCreate() {
               <p>วีดีโอ</p>
               <Select
                 native
-                value={watchVideo.VideoID}
+                value={watchVideo.video_id}
                 onChange={handleChange}
                 inputProps={{
-                  name: "VideoID",
+                  name: "video_id",
                 }}
               >
                 <option aria-label="None" value="">
                   กรุณาเลือกวีดีโอ
                 </option>
                 {videos.map((item: VideosInterface) => (
-                  <option value={item.ID} key={item.ID}>
-                    {item.Name}
+                  <option value={item.id} key={item.id}>
+                    {item.name}
                   </option>
                 ))}
               </Select>
@@ -246,18 +224,18 @@ function WatchVideoCreate() {
               <p>ความละอียด</p>
               <Select
                 native
-                value={watchVideo.ResolutionID}
+                value={watchVideo.resolution_id}
                 onChange={handleChange}
                 inputProps={{
-                  name: "ResolutionID",
+                  name: "resolution_id",
                 }}
               >
                 <option aria-label="None" value="">
                   กรุณาเลือกความละอียด
                 </option>
                 {resolutions.map((item: ResolutionsInterface) => (
-                  <option value={item.ID} key={item.ID}>
-                    {item.Value}
+                  <option value={item.id} key={item.id}>
+                    {item.value}
                   </option>
                 ))}
               </Select>
@@ -268,25 +246,19 @@ function WatchVideoCreate() {
               <p>เพลย์ลิสต์</p>
               <Select
                 native
-                value={watchVideo.PlaylistID}
+                value={playlists?.id}
                 onChange={handleChange}
                 disabled
                 inputProps={{
-                  name: "PlaylistID",
+                  name: "playlist_id",
                 }}
               >
                 <option aria-label="None" value="">
                   กรุณาเลือกเพลย์ลิสต์
                 </option>
-                <option value={playlists?.ID} key={playlists?.ID}>
-                  {playlists?.Title}
+                <option value={playlists?.id} key={playlists?.id}>
+                  {playlists?.title}
                 </option>
-
-                {/* {playlists.map((item: PlaylistsInterface) => (
-                  <option value={item.ID} key={item.ID}>
-                    {item.Title}
-                  </option>
-                ))} */}
               </Select>
             </FormControl>
           </Grid>
@@ -295,7 +267,7 @@ function WatchVideoCreate() {
               <p>วันที่และเวลา</p>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <KeyboardDateTimePicker
-                  name="WatchedTime"
+                  name="watched_time"
                   value={selectedDate}
                   onChange={handleDateChange}
                   label="กรุณาเลือกวันที่และเวลา"

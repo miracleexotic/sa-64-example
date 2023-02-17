@@ -9,6 +9,7 @@ import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import bcrypt from "bcryptjs-react";
 
 import { SigninInterface } from "../models/ISignin";
 
@@ -43,7 +44,10 @@ function SignIn() {
   const [error, setError] = useState(false);
 
   const login = () => {
-    const apiUrl = "http://localhost:8080/login";
+    var hash_password = bcrypt.hashSync(signin.password ?? "", 14);
+    setSignin({ ...signin, ["Password" as keyof typeof signin]: hash_password });
+
+    const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}/login`;
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
@@ -106,12 +110,12 @@ function SignIn() {
             margin="normal"
             required
             fullWidth
-            id="Email"
+            id="email"
             label="Email Address"
-            name="Email"
+            name="email"
             autoComplete="email"
             autoFocus
-            value={signin.Email || ""}
+            value={signin.email || ""}
             onChange={handleInputChange}
           />
           <TextField
@@ -119,12 +123,12 @@ function SignIn() {
             margin="normal"
             required
             fullWidth
-            name="Password"
+            name="password"
             label="Password"
             type="password"
-            id="Password"
+            id="password"
             autoComplete="current-password"
-            value={signin.Password || ""}
+            value={signin.password || ""}
             onChange={handleInputChange}
           />
           <Button

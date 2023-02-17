@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function UserCreate() {
   const classes = useStyles();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [user, setUser] = useState<Partial<UsersInterface>>({});
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
@@ -58,15 +57,15 @@ function UserCreate() {
   };
 
   function submit() {
-    var hash_password = bcrypt.hashSync(user.Password ?? "", 14);
+    var hash_password = bcrypt.hashSync(user.password ?? "", 14);
 
     let data = {
-      Name: user.Name ?? "",
-      Email: user.Email ?? "",
+      Name: user.name ?? "",
+      Email: user.email ?? "",
       Password: hash_password ?? "",
     };
 
-    const apiUrl = "http://localhost:8080/users";
+    const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}/users`;
     const requestOptions = {
       method: "POST",
       headers: {
@@ -115,43 +114,43 @@ function UserCreate() {
         <Divider />
         <Grid container spacing={3} className={classes.root}>
           <Grid item xs={6}>
-            <p>ชื่อ</p>
+            <p>Name</p>
             <FormControl fullWidth variant="outlined">
               <TextField
-                id="Name"
+                id="name"
                 variant="outlined"
                 type="string"
                 size="medium"
                 placeholder="กรุณากรอกข้อมูลชื่อ"
-                value={user.Name || ""}
+                value={user.name || ""}
                 onChange={handleInputChange}
               />
             </FormControl>
           </Grid>
           <Grid item xs={6}>
             <FormControl fullWidth variant="outlined">
-              <p>อีเมล</p>
+              <p>Email</p>
               <TextField
-                id="Email"
+                id="email"
                 variant="outlined"
                 type="string"
                 size="medium"
                 placeholder="กรุณากรอกข้อมูลอีเมล"
-                value={user.Email || ""}
+                value={user.email || ""}
                 onChange={handleInputChange}
               />
             </FormControl>
           </Grid>
           <Grid item xs={6}>
-            <p>รหัสผ่าน</p>
+            <p>Password</p>
             <FormControl fullWidth variant="outlined">
               <TextField
-                id="Password"
+                id="password"
                 variant="outlined"
                 type="password"
                 size="medium"
                 placeholder="กรุณากรอกรหัสผ่าน"
-                value={user.Password || ""}
+                value={user.password || ""}
                 onChange={handleInputChange}
               />
             </FormControl>

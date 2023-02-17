@@ -12,7 +12,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import { WatchVideoInterface } from "../models/IWatchVideo";
+import { WatchVideoDataInterface } from "../models/IWatchVideo";
 import { format } from 'date-fns'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -31,8 +31,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function WatchVideos() {
   const classes = useStyles();
-  const [watchVideos, setWatchVideos] = useState<WatchVideoInterface[]>([]);
-  const apiUrl = "http://localhost:8080";
+  const [watchVideoDatas, setWatchVideoDatas] = useState<WatchVideoDataInterface[]>([]);
+  const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}`;
   const requestOptions = {
     method: "GET",
     headers: {
@@ -41,22 +41,23 @@ function WatchVideos() {
     },
   };
 
-  const getWatchVideos = async () => {
+  const getWatchVideoDatas = async () => {
     fetch(`${apiUrl}/watch_videos`, requestOptions)
       .then((response) => response.json())
       .then((res) => {
         console.log(res.data);
         if (res.data) {
-          setWatchVideos(res.data);
+          setWatchVideoDatas(res.data);
         } else {
           console.log("else");
         }
       });
+      console.log(watchVideoDatas)
   };
 
   useEffect(() => {
-    getWatchVideos();
-  }, []);
+    getWatchVideoDatas();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
@@ -105,13 +106,13 @@ function WatchVideos() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {watchVideos.map((item: WatchVideoInterface) => (
-                <TableRow key={item.ID}>
-                  <TableCell align="center">{item.ID}</TableCell>
-                  <TableCell align="center">{item.Video.Name}</TableCell>
-                  <TableCell align="center">{item.Resolution.Value}</TableCell>
-                  <TableCell align="center">{item.Playlist.Title}</TableCell>
-                  <TableCell align="center">{format((new Date(item.WatchedTime)), 'dd MMMM yyyy hh:mm a')}</TableCell>
+              {watchVideoDatas.map((item: WatchVideoDataInterface) => (
+                <TableRow key={item.id}>
+                  <TableCell align="center">{item.id}</TableCell>
+                  <TableCell align="center">{item.video.name}</TableCell>
+                  <TableCell align="center">{item.resolution.value}</TableCell>
+                  <TableCell align="center">{item.playlist.title}</TableCell>
+                  <TableCell align="center">{format((new Date(item.watched_time)), 'dd MMMM yyyy hh:mm a')}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
