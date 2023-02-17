@@ -1,5 +1,5 @@
 export interface ResolutionsInterface {
-    ID: number,
-    Value: string,
+    id: string,
+    value: string,
   }
   

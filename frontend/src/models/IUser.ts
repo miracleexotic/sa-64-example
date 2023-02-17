@@ -1,6 +1,7 @@
 export interface UsersInterface {
-  ID: number,
-  Name: string,
-  Email: string,
-  Password: string
+  id: string,
+  name: string,
+  email: string,
+  student_id: string
+  password: string
 }
