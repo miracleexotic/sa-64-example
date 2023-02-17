@@ -47,10 +47,7 @@ func main() {
 
 			// WatchVideo Routes
 			protected.GET("/watch_videos", controller.ListWatchVideos)
-			protected.GET("/watchvideo/:id", controller.GetWatchVideo)
-			protected.POST("/watch_videos", controller.CreateWatchVideo)
-			protected.PATCH("/watch_videos", controller.UpdateWatchVideo)
-			protected.DELETE("/watchvideors/:id", controller.DeleteWatchVideo)
+			protected.POST("/watch_video", controller.CreateWatchVideo)
 
 		}
 	}
