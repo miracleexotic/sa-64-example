@@ -1,156 +1,205 @@
 package entity
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"reflect"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+// Connection data
+const uri = "mongodb+srv://user:P%40ssw0rd@clustergo.suvtb.mongodb.net"
+const database_name = "sa-64"
 
-func DB() *gorm.DB {
+var db *mongo.Database
+
+func DB() *mongo.Database {
 	return db
 }
 
-func SetupDatabase() {
-	database, err := gorm.Open(sqlite.Open("sa-64.db"), &gorm.Config{})
+func ConnectDatabase() *mongo.Client {
+	fmt.Printf("[>] Connecting to MongoDB... ")
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		panic("failed to connect database")
+		fmt.Println("[Failed]")
+		log.Fatal(err)
 	}
 
-	// Migrate the schema
-	database.AutoMigrate(
-		&Video{},
-		&User{},
-		&Playlist{},
-		&Resolution{},
-		&WatchVideo{},
-	)
+	// Ping the primary
+	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
+		fmt.Println("[Failed]")
+		log.Fatal(err)
+	}
+	fmt.Println("[Connected]")
 
-	db = database
+	db = client.Database(database_name)
+	return client
+}
 
-	password, err := bcrypt.GenerateFromPassword([]byte("123456"), 14)
+func ClearDatabase() {
+	fmt.Printf("[-] Clearing All Collections... ")
 
-	db.Model(&User{}).Create(&User{
-		Name:     "Chanwit",
-		Email:    "chanwit@gmail.com",
-		Password: string(password),
+	collections := []string{"Users", "Videos", "Resolutions", "Playlists"}
+
+	for i := 0; i < len(collections); i++ {
+		if err := db.Collection(collections[i]).Drop(context.TODO()); err != nil {
+			fmt.Println("[Failed]")
+			log.Fatal(err)
+		}
+	}
+
+	fmt.Println("[Completed]")
+}
+
+func CreateDatabase() {
+	fmt.Println("[+] Creating init database... ")
+	// Users
+	password, _ := bcrypt.GenerateFromPassword([]byte("123456"), 14)
+
+	chanwit := User{
+		ID:        primitive.NewObjectID(),
+		Name:      "Chanwit",
+		Email:     "chanwit@gmail.com",
+		StudentID: "B6200000",
+		Password:  string(password),
+	}
+	name := User{
+		ID:        primitive.NewObjectID(),
+		Name:      "Name",
+		Email:     "name@example.com",
+		StudentID: "B6200001",
+		Password:  string(password),
+	}
+
+	res, err := db.Collection("Users").InsertMany(context.TODO(), []interface{}{
+		&chanwit,
+		&name,
 	})
-	db.Model(&User{}).Create(&User{
-		Name:     "Name",
-		Email:    "name@example.com",
-		Password: string(password),
-	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf(" |- Users: %v\n", res.InsertedIDs)
 
-	var chanwit User
-	var name User
-	db.Raw("SELECT * FROM users WHERE email = ?", "chanwit@gmail.com").Scan(&chanwit)
-	db.Raw("SELECT * FROM users WHERE email = ?", "name@example.com").Scan(&name)
-
-	// --- Video Data
+	// Videos
 	saLecture4 := Video{
-		Name:  "SA Lecture 4",
-		Url:   "https://youtu.be/123",
-		Owner: chanwit,
+		ID:      primitive.NewObjectID(),
+		Name:    "SA Lecture 4",
+		Url:     "https://youtu.be/123",
+		OwnerID: chanwit.ID,
 	}
-	db.Model(&Video{}).Create(&saLecture4)
-
 	howTo := Video{
-		Name:  "How to ...",
-		Url:   "https://youtu.be/456",
-		Owner: chanwit,
+		ID:      primitive.NewObjectID(),
+		Name:    "How to ...",
+		Url:     "https://youtu.be/456",
+		OwnerID: chanwit.ID,
 	}
-	db.Model(&Video{}).Create(&howTo)
-
 	helloWorld := Video{
-		Name:  "Hello World with C",
-		Url:   "https://youtu.be/789",
-		Owner: name,
+		ID:      primitive.NewObjectID(),
+		Name:    "Hello World with C",
+		Url:     "https://youtu.be/789",
+		OwnerID: name.ID,
 	}
-	db.Model(&Video{}).Create(&helloWorld)
 
-	// Resolution Data
+	res, err = db.Collection("Videos").InsertMany(context.TODO(), []interface{}{
+		&saLecture4,
+		&howTo,
+		&helloWorld,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf(" |- Videos: %v\n", res.InsertedIDs)
+
+	// Resolutions
 	res360p := Resolution{
+		ID:    primitive.NewObjectID(),
 		Value: "360p",
 	}
-	db.Model(&Resolution{}).Create(&res360p)
-
 	res480p := Resolution{
+		ID:    primitive.NewObjectID(),
 		Value: "480p",
 	}
-	db.Model(&Resolution{}).Create(&res480p)
-
 	res720p := Resolution{
+		ID:    primitive.NewObjectID(),
 		Value: "720p",
 	}
-	db.Model(&Resolution{}).Create(&res720p)
 
-	// PlayList Data
+	res, err = db.Collection("Resolutions").InsertMany(context.TODO(), []interface{}{
+		&res360p,
+		&res480p,
+		&res720p,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf(" |- Resolutions: %v\n", res.InsertedIDs)
+
+	// Playlists
 	watchedPlayListOfChanwit := Playlist{
-		Title: "Watched",
-		Owner: chanwit,
+		ID:      primitive.NewObjectID(),
+		Title:   "Watched",
+		OwnerID: chanwit.ID,
+		WatchVideos: []WatchVideo{
+			{
+				WatchedTime:  time.Now(),
+				VideoID:      saLecture4.ID,
+				ResolutionID: res720p.ID,
+			},
+			{
+				WatchedTime:  time.Now(),
+				VideoID:      helloWorld.ID,
+				ResolutionID: res720p.ID,
+			},
+		},
 	}
-	db.Model(&Playlist{}).Create(&watchedPlayListOfChanwit)
-
 	musicPlayListOfChanwit := Playlist{
-		Title: "Music",
-		Owner: chanwit,
+		ID:          primitive.NewObjectID(),
+		Title:       "Music",
+		OwnerID:     chanwit.ID,
+		WatchVideos: []WatchVideo{},
 	}
-	db.Model(&Playlist{}).Create(&musicPlayListOfChanwit)
-
 	watchedPlayListOfName := Playlist{
-		Title: "Watched",
-		Owner: name,
+		ID:      primitive.NewObjectID(),
+		Title:   "Watched",
+		OwnerID: name.ID,
+		WatchVideos: []WatchVideo{
+			{
+				WatchedTime:  time.Now(),
+				VideoID:      helloWorld.ID,
+				ResolutionID: res480p.ID,
+			},
+		},
 	}
-	db.Model(&Playlist{}).Create(&watchedPlayListOfName)
 
-	// watch 1
-	db.Model(&WatchVideo{}).Create(&WatchVideo{
-		Playlist:    watchedPlayListOfChanwit,
-		Video:       saLecture4,
-		WatchedTime: time.Now(),
-		Resolution:  res720p,
+	res, err = db.Collection("Playlists").InsertMany(context.TODO(), []interface{}{
+		&watchedPlayListOfChanwit,
+		&musicPlayListOfChanwit,
+		&watchedPlayListOfName,
 	})
-	// watch 2
-	db.Model(&WatchVideo{}).Create(&WatchVideo{
-		Playlist:    watchedPlayListOfName,
-		Video:       helloWorld,
-		WatchedTime: time.Now(),
-		Resolution:  res480p,
-	})
-	// watch 3
-	db.Model(&WatchVideo{}).Create(&WatchVideo{
-		Playlist:    watchedPlayListOfChanwit,
-		Video:       helloWorld,
-		WatchedTime: time.Now(),
-		Resolution:  res720p,
-	})
-
-	//
-	// === Query
-	//
-
-	var target User
-	db.Model(&User{}).Find(&target, db.Where("email = ?", "chanwit@gmail.com"))
-
-	var watchedPlaylist Playlist
-	db.Model(&Playlist{}).Find(&watchedPlaylist, db.Where("title = ? and owner_id = ?", "Watched", target.ID))
-
-	var watchedList []*WatchVideo
-	db.Model(&WatchVideo{}).
-		Joins("Playlist").
-		Joins("Resolution").
-		Joins("Video").
-		Find(&watchedList, db.Where("playlist_id = ?", watchedPlaylist.ID))
-
-	for _, wl := range watchedList {
-		fmt.Printf("Watch Video: %v\n", wl.ID)
-		fmt.Printf("%v\n", wl.Playlist.Title)
-		fmt.Printf("%v\n", wl.Resolution.Value)
-		fmt.Printf("%v\n", wl.Video.Name)
-		fmt.Println("====")
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Printf(" |- Playlists: %v\n", res.InsertedIDs)
+}
+
+func SetupDatabase() {
+	client := ConnectDatabase()
+	fmt.Println(reflect.TypeOf(client))
+
+	// defer func() {
+	// 	if err := client.Disconnect(context.TODO()); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }()
+
+	ClearDatabase()
+	CreateDatabase()
+
 }

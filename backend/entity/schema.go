@@ -4,64 +4,54 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
-	gorm.Model
-	Name      string `valid:"required~Name cannot be blank"`
-	Email     string `gorm:"uniqueIndex" valid:"email"`
-	StudentID string `valid:"matches(^[BMD]\\d{7}$)"`
-	Password  string
-
-	// 1 user เป็นเจ้าของได้หลาย video
-	Videos []Video `gorm:"foreignKey:OwnerID"`
-	// 1 user เป็นเจ้าของได้หลาย playlist
-	Playlists []Playlist `gorm:"foreignKey:OwnerID"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name      string             `bson:"name,omitempty" json:"name" valid:"required~Name cannot be blank"`
+	Email     string             `bson:"email,omitempty" json:"email" valid:"email"`
+	StudentID string             `bson:"student_id,omitempty" json:"student_id" valid:"matches(^[BMD]\\d{7}$)"`
+	Password  string             `bson:"password,omitempty" json:"password"`
 }
 
 type Video struct {
-	gorm.Model
-	Name string
-	Url  string `gorm:"uniqueIndex"`
-	// OwnerID ทำหน้าที่เป็น FK
-	OwnerID *uint
-	// เป็นข้อมูล user เมื่อ join ตาราง
-	Owner       User         `gorm:"references:id"`
-	WatchVideos []WatchVideo `gorm:"foreignKey:VideoID"`
-}
-
-type Playlist struct {
-	gorm.Model
-	Title string
-	// OwnerID ทำหน้าที่เป็น FK
-	OwnerID *uint
-	// เป็นข้อมูล user เมื่อ join ตาราง
-	Owner       User         `gorm:"references:id"`
-	WatchVideos []WatchVideo `gorm:"foreignKey:PlaylistID"`
+	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name    string             `bson:"name,omitempty" json:"name"`
+	Url     string             `bson:"url,omitempty" json:"url"`
+	OwnerID primitive.ObjectID `bson:"owner_id,omitempty" json:"owner_id"`
 }
 
 type Resolution struct {
-	gorm.Model
-	Value       string
-	WatchVideos []WatchVideo `gorm:"foreignKey:ResolutionID"`
+	ID    primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Value string             `bson:"value,omitempty" json:"value"`
 }
 
 type WatchVideo struct {
-	gorm.Model
-	WatchedTime time.Time `valid:"past~Watched time must be a past date"`
+	WatchedTime  time.Time          `bson:"watched_time,omitempty" json:"watched_time" valid:"past~Watched time must be a past date"`
+	VideoID      primitive.ObjectID `bson:"video_id,omitempty" json:"video_id"`
+	ResolutionID primitive.ObjectID `bson:"resolution_id,omitempty" json:"resolution_id"`
+}
 
-	// ResolutionID ทำหน้าที่เป็น FK
-	ResolutionID *uint
-	Resolution   Resolution `gorm:"references:id" valid:"-"` 
+type WatchVideoData struct {
+	ID          int       `json:"id"`
+	WatchedTime time.Time `bson:"watched_time,omitempty" json:"watched_time" valid:"past~Watched time must be a past date"`
 
-	// PlaylistID ทำหน้าที่เป็น FK
-	PlaylistID *uint
-	Playlist   Playlist `gorm:"references:id" valid:"-"` 
+	ResolutionID primitive.ObjectID `bson:"resolution_id,omitempty" json:"resolution_id"`
+	Resolution   Resolution         `bson:"resolution,omitempty" json:"resolution"`
 
-	// VideoID ทำหน้าที่เป็น FK
-	VideoID *uint
-	Video   Video `gorm:"references:id" valid:"-"`
+	PlaylistID primitive.ObjectID `bson:"playlist_id,omitempty" json:"playlist_id"`
+	Playlist   Playlist           `bson:"playlist,omitempty" json:"playlist"`
+
+	VideoID primitive.ObjectID `bson:"video_id,omitempty" json:"video_id"`
+	Video   Video              `bson:"video,omitempty" json:"video"`
+}
+
+type Playlist struct {
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Title       string             `bson:"title,omitempty" json:"title"`
+	OwnerID     primitive.ObjectID `bson:"owner_id,omitempty" json:"owner_id"`
+	WatchVideos []WatchVideo       `bson:"watch_videos,omitempty" json:"watch_videos"`
 }
 
 func init() {
