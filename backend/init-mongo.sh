@@ -1,18 +1,23 @@
 mongosh -- "$MONGO_INITDB_DATABASE" <<EOF
-    var rootUser = '$MONGO_INITDB_ROOT_USERNAME';
-    var rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';
-    var admin = db.getSiblingDB('admin');
-    admin.auth(rootUser, rootPassword);
-    var user = '$MONGO_INITDB_USERNAME';
-    var passwd = '$MONGO_INITDB_PASSWORD';
+    const rootUser = '$MONGO_INITDB_ROOT_USERNAME';
+    const rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';
 
-    db.createUser({
+    const adminDb = db.getSiblingDB('admin');
+    adminDb.auth(rootUser, rootPassword);
+
+    const user = '$MONGO_INITDB_USERNAME';
+    const passwd = '$MONGO_INITDB_PASSWORD';
+
+    const targetDbStr = '$MONGO_INITDB_DATABASE';
+    const targetDb = db.getSiblingDB(targetDbStr);
+
+    targetDb.createUser({
       user: user,
       pwd: passwd,
       roles: [
         {
           role: "readWrite",
-          db: '$MONGO_INITDB_DATABASE'
+          db: targetDbStr
         }
       ]
     });
