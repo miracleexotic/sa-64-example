@@ -28,20 +28,20 @@ func ConnectDatabase() *mongo.Client {
 		log.Fatal(err)
 	}
 
-	uri := "mongodb+srv://" + os.Getenv("DB_MONGO_USER") + ":" + os.Getenv("DB_MONGO_PASS") + "@" + os.Getenv("DB_MONGO_URL")
+	uri := "mongodb://" + os.Getenv("DB_MONGO_USER") + ":" + os.Getenv("DB_MONGO_PASS") + "@" + os.Getenv("DB_MONGO_URL") + ":" + os.Getenv("DB_MONGO_PORT")
 	database_name := os.Getenv("DB_MONGO_NAME")
 
 	fmt.Printf("[>] Connecting to MongoDB... ")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		fmt.Println("[Failed]")
-		log.Fatal(err)
+		panic(err)
 	}
 
 	// Ping the primary
 	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
 		fmt.Println("[Failed]")
-		log.Fatal(err)
+		panic(err)
 	}
 	fmt.Println("[Connected]")
 
