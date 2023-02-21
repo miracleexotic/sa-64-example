@@ -28,8 +28,8 @@ func ConnectDatabase() *mongo.Client {
 		log.Fatal(err)
 	}
 
-	uri := "mongodb://" + os.Getenv("DB_MONGO_USER") + ":" + os.Getenv("DB_MONGO_PASS") + "@" + os.Getenv("DB_MONGO_URL") + ":" + os.Getenv("DB_MONGO_PORT")
 	database_name := os.Getenv("DB_MONGO_NAME")
+	uri := "mongodb://" + os.Getenv("DB_MONGO_USER") + ":" + os.Getenv("DB_MONGO_PASS") + "@" + os.Getenv("DB_MONGO_URL") + ":" + os.Getenv("DB_MONGO_PORT") + "/" + database_name
 
 	fmt.Printf("[>] Connecting to MongoDB... ")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
