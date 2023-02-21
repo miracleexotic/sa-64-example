@@ -65,7 +65,7 @@ function UserCreate() {
       Password: hash_password ?? "",
     };
 
-    const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}/users`;
+    const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/users`;
     const requestOptions = {
       method: "POST",
       headers: {

@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
 function WatchVideos() {
   const classes = useStyles();
   const [watchVideoDatas, setWatchVideoDatas] = useState<WatchVideoDataInterface[]>([]);
-  const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}`;
+  const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}`;
   const requestOptions = {
     method: "GET",
     headers: {

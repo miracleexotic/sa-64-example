@@ -61,7 +61,7 @@ function WatchVideoCreate() {
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}`;
+  const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}`;
   const requestOptions = {
     method: "GET",
     headers: {

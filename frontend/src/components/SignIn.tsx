@@ -47,7 +47,7 @@ function SignIn() {
     var hash_password = bcrypt.hashSync(signin.password ?? "", 14);
     setSignin({ ...signin, ["Password" as keyof typeof signin]: hash_password });
 
-    const apiUrl = `http://localhost:${process.env.REACT_APP_BACKEND_PORT}/login`;
+    const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/login`;
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
