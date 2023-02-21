@@ -1,0 +1,59 @@
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=P@ssw0rd
+      - MONGO_INITDB_DATABASE=sa-64
+      - MONGO_INITDB_USERNAME=user
+      - MONGO_INITDB_PASSWORD=P@ssw0rd
+    volumes:
+      - ./backend/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+    ports:
+      - "27017:27017"
+    networks:
+      - dev_network
+
+  backend:
+    depends_on:
+      - mongodb
+    container_name: sa-64-backend
+    # image: sa-64-backend
+    build: 
+        dockerfile: backend\Dockerfile
+    restart: always
+    env_file:
+      - backend/.env
+    environment:
+        DB_MONGO_USER: admin
+        DB_MONGO_PASS: P%40ssw0rd
+        DB_MONGO_URL: mongodb
+        DB_MONGO_NAME: sa-64
+        DB_MONGO_PORT: 27017
+    ports:
+      - "38080:8080"
+    networks:
+      - dev_network
+
+  frontend:
+    container_name: sa-64-frontend
+    # image: sa-64-frontend
+    build: 
+        dockerfile: frontend\Dockerfile
+    restart: always
+    env_file:
+      - frontend/.env
+    environment:
+        # REACT_APP_BACKEND_SERVER: sa-64-backend
+        REACT_APP_BACKEND_PORT: 38080
+    ports:
+      - "33000:3000"
+    networks:
+      - dev_network
+
+networks:
+  dev_network:
+
+
