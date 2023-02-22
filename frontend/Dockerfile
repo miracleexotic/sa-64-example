@@ -4,10 +4,10 @@ FROM node:14.17.5-alpine3.14
 
 WORKDIR /frontend
 
-COPY frontend/package*.json ./
+COPY package*.json ./
 RUN npm install
 
-COPY frontend/. .
+COPY . .
 
 EXPOSE 3000
 
