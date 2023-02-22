@@ -5,7 +5,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -25,7 +25,7 @@ spec:
         - name: DB_MONGO_PASS
           value: "P%40ssw0rd"
         - name: DB_MONGO_URL
-          value: "mongodb-sfs-0"
+          value: "mongodb-svc"
         - name: DB_MONGO_PORT
           value: "27017"
         - name: DB_MONGO_NAME
@@ -38,7 +38,9 @@ metadata:
 spec:
   selector:
     app: backend
+  type: NodePort
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
+      nodePort: 30201
