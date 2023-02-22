@@ -7,16 +7,17 @@ data:
     storage:
       dbPath: /data/db
   ensure-users.js: |
+    const fs = require('fs');
     const targetDbStr = 'sa-64';
-    const rootUser = cat('/etc/mongo-init/admin/MONGO_ROOT_USERNAME');
-    const rootPass = cat('/etc/mongo-init/admin/MONGO_ROOT_PASSWORD');
-    const usersStr = cat('/etc/mongo-init/MONGO_USERS_LIST');
+    const rootUser = fs.readFileSync('/etc/mongo-init/admin/MONGO_ROOT_USERNAME').toString().trim();
+    const rootPass = fs.readFileSync('/etc/mongo-init/admin/MONGO_ROOT_PASSWORD').toString().trim();
+    const usersStr = fs.readFileSync('/etc/mongo-init/MONGO_USERS_LIST').toString().trim();
     const adminDb = db.getSiblingDB('admin');
     adminDb.auth(rootUser, rootPass);
-    print('Successfully authenticated admin user');
+    console.log('Successfully authenticated admin user');
     const targetDb = db.getSiblingDB(targetDbStr);
     const customRoles = adminDb
-      .getRoles({rolesInfo: 1, showBuiltinRoles: false})
+      .getRoles({rolesInfo: 1, showBuiltinRoles: false}).roles
       .map(role => role.role)
       .filter(Boolean);
     usersStr
