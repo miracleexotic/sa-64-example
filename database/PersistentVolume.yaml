@@ -11,12 +11,12 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: mongodb-storageclass
   local:
-    path: /mnt/data
+    path: /mnt/data/
   nodeAffinity:
     required:
       nodeSelectorTerms:
       - matchExpressions:
-        - key: size
+        - key: kubernetes.io/hostname
           operator: In
           values:
-            - large
+            - mai-k8s-wk02

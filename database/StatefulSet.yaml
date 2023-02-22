@@ -37,7 +37,7 @@ spec:
         - name: mongodb-data
           mountPath: /data/db
       nodeSelector:
-        size: large
+        kubernetes.io/hostname: mai-k8s-wk02
       volumes:
       - name: mongo-init
         secret:
