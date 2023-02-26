@@ -33,7 +33,7 @@ services:
         DB_MONGO_NAME: sa-64
         DB_MONGO_PORT: 27017
     ports:
-      - "38080:8080"
+      - "30201:8080"
     networks:
       - dev_network
 
@@ -47,9 +47,9 @@ services:
       - frontend/.env
     environment:
         # REACT_APP_BACKEND_SERVER: sa-64-backend
-        REACT_APP_BACKEND_PORT: 38080
+        REACT_APP_BACKEND_PORT: 30201
     ports:
-      - "33000:3000"
+      - "30202:3000"
     networks:
       - dev_network
 
