@@ -11,11 +11,11 @@ WORKDIR /backend
 RUN apk --update add \
     util-linux-dev
 
-COPY go.mod ./
-COPY go.sum ./
+COPY backend/go.mod ./
+COPY backend/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY backend/. .
 RUN go build -a -ldflags "-linkmode external -extldflags '-static' -s -w" -o /sa-64-backend
 
 EXPOSE 8080

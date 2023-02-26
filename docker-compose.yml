@@ -22,7 +22,7 @@ services:
     container_name: sa-64-backend
     # image: sa-64-backend
     build: 
-        dockerfile: backend\Dockerfile
+        dockerfile: backend/Dockerfile
     restart: always
     env_file:
       - backend/.env
@@ -41,7 +41,7 @@ services:
     container_name: sa-64-frontend
     # image: sa-64-frontend
     build: 
-        dockerfile: frontend\Dockerfile
+        dockerfile: frontend/Dockerfile
     restart: always
     env_file:
       - frontend/.env
