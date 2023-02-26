@@ -48,6 +48,8 @@ function SignIn() {
     setSignin({ ...signin, ["Password" as keyof typeof signin]: hash_password });
 
     const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/login`;
+    console.log(process.env.REACT_APP_BACKEND_SERVER)
+    console.log(process.env.REACT_APP_BACKEND_PORT)
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
