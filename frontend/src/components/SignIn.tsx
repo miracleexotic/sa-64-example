@@ -46,7 +46,7 @@ function SignIn() {
   const login = () => {
     var hash_password = bcrypt.hashSync(signin.password ?? "", 14);
     console.log(hash_password)
-    signin.password = hash_password
+    // signin.password = hash_password
     // setSignin({ ...signin, ["password" as keyof typeof signin]: hash_password });
 
     const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/login`;
