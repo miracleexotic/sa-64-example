@@ -50,25 +50,26 @@ function SignIn() {
     // setSignin({ ...signin, ["password" as keyof typeof signin]: hash_password });
 
     const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/login`;
-    console.log(apiUrl)
-    console.log(process.env.REACT_APP_BACKEND_SERVER +":"+ process.env.REACT_APP_BACKEND_PORT)
-    console.log(JSON.stringify(signin))
+    // console.log(apiUrl)
+    // console.log(process.env.REACT_APP_BACKEND_SERVER +":"+ process.env.REACT_APP_BACKEND_PORT)
+    // console.log(JSON.stringify(signin))
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(signin)
+      body: JSON.stringify(signin),
     };
     fetch(apiUrl, requestOptions)
-      .then((response) => response.json())
+      .then((response) => response.text())
       .then((res) => {
-        if (res.data) {
-          setSuccess(true);
-          localStorage.setItem("token", res.data.token);
-          localStorage.setItem("uid", res.data.id);
-          window.location.reload()
-        } else {
-          setError(true);
-        }
+        console.log(res)
+        // if (res.data) {
+        //   setSuccess(true);
+        //   localStorage.setItem("token", res.data.token);
+        //   localStorage.setItem("uid", res.data.id);
+        //   window.location.reload()
+        // } else {
+        //   setError(true);
+        // }
       });
   };
 
