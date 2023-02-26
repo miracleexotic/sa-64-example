@@ -56,7 +56,7 @@ function SignIn() {
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
-      body: JSON.stringify(signin),
+      body: JSON.stringify(signin)
     };
     fetch(apiUrl, requestOptions)
       .then((response) => response.json())
