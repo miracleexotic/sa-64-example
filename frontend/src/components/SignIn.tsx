@@ -50,6 +50,7 @@ function SignIn() {
     // setSignin({ ...signin, ["password" as keyof typeof signin]: hash_password });
 
     const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/login`;
+    console.log(apiUrl)
     console.log(process.env.REACT_APP_BACKEND_SERVER +":"+ process.env.REACT_APP_BACKEND_PORT)
     console.log(JSON.stringify(signin))
     const requestOptions = {
