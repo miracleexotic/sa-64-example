@@ -59,17 +59,16 @@ function SignIn() {
       body: JSON.stringify(signin),
     };
     fetch(apiUrl, requestOptions)
-      .then((response) => response.text())
+      .then((response) => response.json())
       .then((res) => {
-        console.log(res)
-        // if (res.data) {
-        //   setSuccess(true);
-        //   localStorage.setItem("token", res.data.token);
-        //   localStorage.setItem("uid", res.data.id);
-        //   window.location.reload()
-        // } else {
-        //   setError(true);
-        // }
+        if (res.data) {
+          setSuccess(true);
+          localStorage.setItem("token", res.data.token);
+          localStorage.setItem("uid", res.data.id);
+          window.location.reload()
+        } else {
+          setError(true);
+        }
       });
   };
 
