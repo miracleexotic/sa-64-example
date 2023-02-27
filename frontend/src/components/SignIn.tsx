@@ -47,7 +47,8 @@ function SignIn() {
     const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/login`;
     const requestOptions = {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
+      // headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(signin),
     };
     fetch(apiUrl, requestOptions)
