@@ -21,7 +21,7 @@ spec:
         - containerPort: 3000
         env:
         - name: REACT_APP_BACKEND_SERVER
-          value: "10.105.27.11"
+          value: "http://10.105.27.11"
         - name: REACT_APP_BACKEND_PORT
           value: "30201"
 ---
