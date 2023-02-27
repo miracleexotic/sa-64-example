@@ -9,7 +9,6 @@ import Snackbar from "@material-ui/core/Snackbar";
 import MuiAlert, { AlertProps } from "@material-ui/lab/Alert";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import bcrypt from "bcryptjs-react";
 
 import { SigninInterface } from "../models/ISignin";
 
@@ -44,12 +43,8 @@ function SignIn() {
   const [error, setError] = useState(false);
 
   const login = () => {
-    var hash_password = bcrypt.hashSync(signin.password ?? "", 14);
-    setSignin({ ...signin, ["password" as keyof typeof signin]: hash_password });
 
     const apiUrl = `${process.env.REACT_APP_BACKEND_SERVER}:${process.env.REACT_APP_BACKEND_PORT}/login`;
-    console.log(process.env.REACT_APP_BACKEND_SERVER)
-    console.log(process.env.REACT_APP_BACKEND_PORT)
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json", "Strict-Transport-Security": "max-age=31536000; includeSubDomains" },
